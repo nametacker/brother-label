@@ -6,17 +6,17 @@ class PrintInformation(object):
     flags_priority = 0x40
     flags_printer_recovery_always_on = 0x80
     
-    media_type_continous = 0x0A
-    media_type_diecut = 0x0B
+    media_type_continous = "0A"
+    media_type_diecut = "0B"
     
-    page_start = 0x00
-    page_other = 0x01
+    page_start = "00"
+    page_other = "01"
     
 class CommandMode(object):
     
-    escp = 0x00
-    raster = 0x01
-    ptouch_template = 0x03
+    escp = "00"
+    raster = "01"
+    ptouch_template = "03"
     
 class CompressionMode(object):
     
@@ -63,31 +63,31 @@ to the receiving state.
         """
         Specify margin amount (feed amount at beginning and end of page)
         """
-        return self.command_prefix() + "64" + hex(int(margin / 256) << 8 | margin % 256)
+        return self.command_prefix() + "64" + self.hex(int(margin / 256) << 8 | margin % 256)
     
     def print_information(self, flags, media_type, media_width, media_length, num_lines, start_page=PrintInformation.page_start):
         """
         Print information command
         """
-        return bytes([0x1B, 0x69, 0x7A, flags, media_type, media_width, media_length, int(num_lines / 256), num_lines % 256, 0x00, 0x00, start_page, 0x00])
+        return "1B697A" + self.hex(flags) + media_type + self.hex(media_width) + self.hex(media_length) + self.hex(int(num_lines / 256)) + self.hex(num_lines % 256) + "0000" + start_page + "00"
     
     def print_page(self):
         """
         Used as a print command at the end of pages other than the last page when multiple pages are printed.
         """
-        return 0x0C
+        return "0C"
     
     def print_last_page(self):
         """
         Used as a print command at the end of the last page.
         """
-        return 0x1A
+        return "1A"
     
     def various_mode(self, mode):
         """
         Set various switches
         """
-        return self.command_prefix() + 0x4D + mode
+        return self.command_prefix() + "4D" + self.hex(mode)
     
     def compression_mode(self, mode):
         """
@@ -108,7 +108,7 @@ to the receiving state.
         """
         Specify the page number in “cut each * labels”
         """
-        return self.command_prefix() + 0x41 + page
+        return self.command_prefix() + "41" + self.hex(page)
     
     def expand_mode(self, cut_at_end=True, high_resolution=False):
         """
@@ -119,6 +119,9 @@ to the receiving state.
             mode = mode | 1 << 3
         if high_resolution:
             mode = mode | 1 << 6
-        return self.command_prefix() + mode
+        return self.command_prefix() + self.hex(mode)
+    
+    def hex(self, n):
+        return "%0.2x" % n
 
             

@@ -12,11 +12,13 @@ class Status(object):
     
     def __init__(self, printer):
         self.printer = printer
-    
+        
+    def query(self):
+        self.printer.send("1B6953") # Status
+            
     def read(self):
         #self.printer.send("00" * 200) # Reset
         #self.printer.send("1b40") # Init
-        self.printer.send("1B6953") # Status
         data = self.printer.read()
         self.printer.close()
         if len(data) != 32:
@@ -94,6 +96,7 @@ class Label(object):
         
         self.commands.append(self.c.invalidate())
         self.commands.append(self.c.initialize())
+        self.commands.append("1B6953") # Status
         self.commands.append(self.c.select_mode(CommandMode.raster))
         i = self.c.print_information(
              PrintInformation.flags_media_type | PrintInformation.flags_media_width | PrintInformation.flags_printer_recovery_always_on,
@@ -111,11 +114,15 @@ class Label(object):
         
         for line in data:
             hstr = '%0*X' % ((len(line) + 3) // 4, int(line, 2))
-            b = bytes.fromhex(hstr)
-            self.commands.append(b)
+            #b = bytes.fromhex(hstr)
+            self.commands.append(hstr)
         self.commands.append(self.c.print_last_page())
         
         for command in self.commands:
             self.printer.send(command)
+            
+        s = Status(self.printer)
+        s.read()
+        return s
         
         
