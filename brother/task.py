@@ -1,9 +1,6 @@
 from brother.protocol import Command, PrintInformation, CompressionMode, CommandMode
 from PIL import Image
 import logging
-import socket
-import binascii
-from struct import pack, unpack
 
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
@@ -96,7 +93,7 @@ class Label(object):
         
         self.commands.append(self.c.invalidate())
         self.commands.append(self.c.initialize())
-        self.commands.append("1B6953") # Status
+        #self.commands.append("1B6953") # Status
         self.commands.append(self.c.select_mode(CommandMode.raster))
         i = self.c.print_information(
              PrintInformation.flags_media_type | PrintInformation.flags_media_width | PrintInformation.flags_printer_recovery_always_on,

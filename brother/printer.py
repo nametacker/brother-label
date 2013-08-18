@@ -1,7 +1,6 @@
 import logging
 import socket
 import binascii
-from time import sleep
 
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
@@ -44,11 +43,14 @@ class USBPrinter(object):
         
     def send(self, hexdata):
         hexdata = hexdata.lower()
+        if len(hexdata) / 2 < 64:
+            hexdata = hexdata + "00" * (64-int(len(hexdata)/2))
         self.dev.write(binascii.unhexlify(hexdata))
-        logger.debug('Sent: %s' % (hexdata))
+        self.dev.write(bytes([0x0A]))
+        logger.debug('Sent: %s (%d bytes)' % (hexdata, (len(hexdata) / 2)))
         
     def read(self):
-        data = self.dev.read(32)
+        data = self.dev.read(64)
         logger.debug('Received: %s' % (binascii.hexlify(data)))
         return data
     
